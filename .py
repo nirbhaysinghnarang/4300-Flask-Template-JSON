@@ -1,11 +1,3 @@
-import json
-import os
-import numpy as np
-import pandas as pd
-from flask import Flask, render_template, request, jsonify
-from flask_cors import CORS
-import sys
-
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
@@ -23,7 +15,6 @@ class WeightedTfidfProcessor:
         )
         
         self.corpus = self._prepare_weighted_corpus()
-        print(self.corpus)
         self.tfidf_matrix = self.vectorizer.fit_transform(self.corpus)
         self.feature_names = self.vectorizer.get_feature_names_out()
         
@@ -93,7 +84,6 @@ class WeightedTfidfProcessor:
         for idx in top_indices:
             row = self.rows[idx]
             score = similarities[idx]
-            print(score)
             if score > 0:
                 results.append({
                     'document': self.doc_labels[idx],
@@ -102,42 +92,3 @@ class WeightedTfidfProcessor:
                 })
         
         return results
-
-os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..",os.curdir))
-
-current_directory = os.path.dirname(os.path.abspath(__file__))
-json_file_path = os.path.join(current_directory, 'init.json')
-csv_file_path = os.path.join(current_directory, 'data', 'final_data.csv')
-
-historical_df = pd.read_csv(csv_file_path)
-
-
-weight_processor = WeightedTfidfProcessor(
-    historical_df.to_dict('records'),
-    weight_factor=1
-)
-
-def tfidf_search(query, top_n=5):
-    return weight_processor.search(query, top_n=top_n)
-    
-app = Flask(__name__)
-CORS(app)
-
-@app.route("/")
-def home():
-    mapbox_token = os.environ.get('MAPBOX_ACCESS_TOKEN')
-
-    return render_template('base.html', title="World Heritage Explorer", mapbox_token=mapbox_token)
-
-@app.route("/historical-sites")
-def historical_search():
-    query = request.args.get("query", "")
-    if not query:
-        return jsonify([])
-    results = tfidf_search(query)
-    print(results)
-    print("SUCCESS")
-    return jsonify(results)
-
-if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=8080)

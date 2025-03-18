@@ -1,55 +1,481 @@
-<!doctype html>
-<title>{% block title %}{% endblock %} - Flaskr</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
-<body>
-    <div class="full-body-container">
-        <div class="top-text">
-            <div class="google-colors">
-                <h1 id="google-4">4</h1>
-                <h1 id="google-3">3</h1>
-                <h1 id="google-0-1">0</h1>
-                <h1 id="google-0-2">0</h1>
-            </div>
-            <div class="input-box" onclick="sendFocus()">
-                <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                <input placeholder="Search for a Keeping up with the Kardashians episode" id="filter-text-val" onkeyup="filterText()">
-            </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Historical Events Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+    <style>
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f5f1;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .search-container {
+            margin: 40px auto;
+            max-width: 600px;
+            display: flex;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-radius: 50px;
+            overflow: hidden;
+        }
+        
+        #search-input {
+            flex: 1;
+            padding: 16px 24px;
+            font-size: 18px;
+            border: none;
+            outline: none;
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+        
+        #search-button {
+            padding: 16px 32px;
+            font-size: 18px;
+            background-color: #7d6852;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 600;
+        }
+        
+        #search-button:hover {
+            background-color: #5d4e3d;
+        }
+        
+        .results-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            margin: 40px 0 20px;
+            color: #4a3933;
+            border-bottom: 2px solid #e0d6cc;
+            padding-bottom: 10px;
+        }
+        
+        .result-item {
+            background-color: white;
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+        
+        .result-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background-color: #7d6852;
+        }
+        
+        .result-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: bold;
+            font-size: 24px;
+            color: #4a3933;
+            margin-bottom: 10px;
+        }
+        
+        .result-metadata {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .meta-item {
+            background-color: #f0ebe5;
+            padding: 5px 12px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .meta-item i {
+            opacity: 0.7;
+        }
+        
+        .result-description {
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+        
+        .result-details {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f8f5f1;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 15px;
+        }
+        
+        .significance {
+            display: flex;
+            align-items: center;
+        }
+        
+        .significance-bar {
+            width: 100px;
+            height: 8px;
+            background-color: #e0d6cc;
+            border-radius: 4px;
+            margin-left: 10px;
+            overflow: hidden;
+        }
+        
+        .significance-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7d6852, #a68c69);
+        }
+        
+        .event-expanded {
+            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: none;
+        }
+        
+        .expanded-tabs {
+            display: flex;
+            background-color: #f0ebe5;
+            border-bottom: 1px solid #e0d6cc;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        
+        .tab.active {
+            background-color: #fff;
+            border-top: 3px solid #7d6852;
+            margin-top: -3px;
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: #e5dfd5;
+        }
+        
+        .tab-content {
+            padding: 20px;
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tab-content h3 {
+            font-family: 'Playfair Display', serif;
+            color: #4a3933;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .map-container {
+            height: 250px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            overflow: hidden;
+            width: 100%; /* Make map full width */
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+        }
+        
+        .detail-item strong {
+            display: block;
+            color: #7d6852;
+            margin-bottom: 5px;
+        }
+        
+        .expand-button {
+            background-color: #f0ebe5;
+            border: none;
+            padding: 8px 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        
+        .expand-button:hover {
+            background-color: #e0d6cc;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-style: italic;
+            color: #7d6852;
+            font-size: 18px;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #7d6852;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>    
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search historical events...">
+            <button id="search-button">Explore</button>
         </div>
-        <div id="answer-box">
-
+        
+        <h2 class="results-heading" id="results-heading" style="display: none;">Discovered Events</h2>
+        <div id="results-container">
         </div>
     </div>
-
+    
     <script>
-
-        function answerBoxTemplate(title,titleDesc,rating){
-            return `<div class=''>
-                <h3 class='episode-title'>${title}</h3>
-                <p class='episode-desc'>${titleDesc}</p>
-                <p class='episode-rating'>IMDB Rating: ${rating}</p>
-            </div>`
-        }
-
-        function sendFocus(){
-            document.getElementById('filter-text-val').focus()
-        }
-
-        function filterText(){
-            document.getElementById("answer-box").innerHTML = ""
-            console.log(document.getElementById("filter-text-val").value)
-            fetch("/episodes?" + new URLSearchParams({ title: document.getElementById("filter-text-val").value }).toString())
-            .then((response) => response.json())
-            .then((data) => data.forEach(row => {
-                
-                let tempDiv = document.createElement("div")
-                tempDiv.innerHTML = answerBoxTemplate(row.title,row.descr,row.imdb_rating)
-                document.getElementById("answer-box").appendChild(tempDiv)
-            }));
-
-        }
+        // Get elements
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsHeading = document.getElementById('results-heading');
+        
+        function toggleExpanded(button) {
+            const expandedDiv = button.nextElementSibling;
+            const isHidden = expandedDiv.style.display === 'none' || expandedDiv.style.display === '';
             
+            expandedDiv.style.display = isHidden ? 'block' : 'none';
+            button.textContent = isHidden ? 'Hide Details ↑' : 'View Full Details ↓';
+        }
+        
+        function switchTab(tabElement, contentId) {
+            const tabGroup = tabElement.parentElement;
+            tabGroup.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));            
+            tabElement.classList.add('active');            
+            const tabContentContainer = tabGroup.nextElementSibling;            
+            tabContentContainer.parentElement.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });            
+            document.getElementById(contentId).classList.add('active');
+        }
+        
+        function performSearch() {
+            const query = searchInput.value.trim();
+            if (query === '') {
+                resultsContainer.innerHTML = '<div class="no-results"><p>Please enter a search term to discover historical events.</p></div>';
+                resultsHeading.style.display = 'none';
+                return;
+            }            
+            resultsContainer.innerHTML = '<div class="loading">Searching through history...</div>';
+            resultsHeading.style.display = 'block';            
+            fetch("/historical-sites?" + new URLSearchParams({ query: query }).toString())
+                .then(response => response.json())
+                .then(data => {
+                    resultsContainer.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(event => {
+                            const resultItem = document.createElement('div');
+                            resultItem.className = 'result-item';                            
+                            let yearDisplay = 'Unknown year';
+                            if (event.row && event.row.Year) {
+                                try {
+                                    const yearNum = parseInt(event.row.Year);
+                                    if (!isNaN(yearNum)) {
+                                        yearDisplay = yearNum > 0 ? yearNum + ' CE' : Math.abs(yearNum) + ' BCE';
+                                    }
+                                } catch (e) {
+                                    yearDisplay = event.row.Year.toString();
+                                }
+                            }                            
+                            let metadataHTML = `
+                                <div class="meta-item"><i>🗓️</i> ${yearDisplay}</div>
+                                <div class="meta-item"><i>🏛️</i> ${event.era || 'Unknown era'}</div>
+                            `;
+                            
+                            if (event.row && event.row['Place Name'] && event.row['Place Name'] !== 'undefined' && event.row['Place Name'] !== 'null') {
+                                metadataHTML += `<div class="meta-item"><i>📍</i> ${event.row['Place Name']}${event.row.Country && event.row.Country !== 'undefined' && event.row.Country !== 'null' ? ', ' + event.row.Country : ''}</div>`;
+                            } else if (event.row && event.row.Country && event.row.Country !== 'undefined' && event.row.Country !== 'null') {
+                                metadataHTML += `<div class="meta-item"><i>📍</i> ${event.row.Country}</div>`;
+                            } else {
+                                metadataHTML += `<div class="meta-item"><i>📍</i> Location unknown</div>`;
+                            }                            
+                            const significanceVal = event.score ? Math.round((event.score * 100)) / 10 : 0;
+                            const significancePct = (significanceVal / 10) * 100;
+                            resultItem.innerHTML = `
+                                <div class="result-title">${event.row ? event.row['Name of Incident'] : event.document.split('(')[0].trim()}</div>
+                                <div class="result-metadata">
+                                    ${metadataHTML}
+                                </div>
+                                <div class="result-description">${event.row && event.row.description || 'No description available.'}</div>
+                                <div class="result-details">
+                                    <div class="significance">
+                                        <span>Historical Significance:</span>
+                                        <div class="significance-bar">
+                                            <div class="significance-fill" style="width: ${significancePct}%"></div>
+                                        </div>
+                                        <span style="margin-left: 8px;">${significanceVal.toFixed(1)}/10</span>
+                                    </div>
+                                </div>
+                                <button class="expand-button" onclick="toggleExpanded(this)">View Full Details ↓</button>
+                                
+                                <div class="event-expanded">
+                                    <div class="expanded-tabs">
+                                        <div class="tab active" onclick="switchTab(this, 'details-${data.indexOf(event)}')">Details</div>
+                                        <div class="tab" onclick="switchTab(this, 'context-${data.indexOf(event)}')">Context</div>
+                                        <div class="tab" onclick="switchTab(this, 'consequences-${data.indexOf(event)}')">Consequences</div>
+                                        <div class="tab" onclick="switchTab(this, 'significance-${data.indexOf(event)}')">Significance</div>
+                                        <div class="tab" onclick="switchTab(this, 'facts-${data.indexOf(event)}')">Interesting Facts</div>
+                                    </div>
+                                    
+                                    <div id="details-${data.indexOf(event)}" class="tab-content active">
+                                        <h3>Event Details</h3>
+                                        ${event.row && event.row.longitude && event.row.latitude ? `
+                                        <div class="map-container" id="map-${data.indexOf(event)}"></div>
+                                        ` : ''}
+                                        
+                                        <div class="detail-item">
+                                            <strong>Name of Incident</strong>
+                                            ${event.row ? event.row['Name of Incident'] : event.document.split('(')[0].trim() || 'Unknown'}
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <strong>Type of Event</strong>
+                                            ${event.row && event.row['Type of Event'] || 'Unknown'}
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <strong>Date</strong>
+                                            ${yearDisplay}
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <strong>Location</strong>
+                                            ${event.row && event.row['Place Name'] ? event.row['Place Name'] : ''} ${event.row && event.row.Country ? (event.row['Place Name'] ? ', ' : '') + event.row.Country : 'Unknown location'}
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <strong>Important Person/Group</strong>
+                                            ${event.row && event.row['Important Person/Group Responsible'] || 'Not specified'}
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <strong>Affected Population</strong>
+                                            ${event.row && event.row['Affected Population'] || 'Not specified'}
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <strong>Impact</strong>
+                                            ${event.row && event.row['Impact'] || 'Not specified'}
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <strong>Outcome</strong>
+                                            ${event.row && event.row['Outcome'] || 'Unknown'}
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="context-${data.indexOf(event)}" class="tab-content">
+                                        <h3>Historical Context</h3>
+                                        <p>${event.row && event.row['context'] || 'No context information available for this event.'}</p>
+                                    </div>
+                                    
+                                    <div id="consequences-${data.indexOf(event)}" class="tab-content">
+                                        <h3>Immediate Consequences</h3>
+                                        <p>${event.row && event.row['immediate_consequences'] || 'No immediate consequences information available for this event.'}</p>
+                                    </div>
+                                    
+                                    <div id="significance-${data.indexOf(event)}" class="tab-content">
+                                        <h3>Long-term Significance</h3>
+                                        <p>${event.row && event.row['long_term_significance'] || 'No long-term significance information available for this event.'}</p>
+                                    </div>
+                                    
+                                    <div id="facts-${data.indexOf(event)}" class="tab-content">
+                                        <h3>Interesting Facts</h3>
+                                        <p>${event.row && event.row['interesting_facts'] || 'No interesting facts available for this event.'}</p>
+                                    </div>
+                                </div>
+                            `;
+                            resultsContainer.appendChild(resultItem);
+                            if (event.row && event.row.longitude && event.row.latitude) {
+                                setTimeout(() => {
+                                    const coords = [
+                                        parseFloat(event.row.longitude), 
+                                        parseFloat(event.row.latitude)
+                                    ];
+                                    if (coords && coords[0] && coords[1] && document.getElementById(`map-${data.indexOf(event)}`)) {
+                                        const mapboxToken = '{{ mapbox_token }}';
+                                        mapboxgl.accessToken = mapboxToken;
+                                        const map = new mapboxgl.Map({
+                                            container: `map-${data.indexOf(event)}`,
+                                            style: 'mapbox://styles/nirbhaysinghnarang/clibkhjth02vf01quas1vbm0s',
+                                            center: coords,
+                                            zoom: 4
+                                        });                                        
+                                        new mapboxgl.Marker({ color: '#7d6852' })
+                                            .setLngLat(coords)
+                                            .addTo(map);
+                                    }
+                                }, 100);
+                            }
+                        });
+                    } else {
+                        // No results
+                        resultsContainer.innerHTML = '<div class="no-results"><p>No historical events found matching your search.</p></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                    throw error
+                    resultsContainer.innerHTML = '<div class="no-results"><p>An error occurred while searching. Please try again.</p></div>';
+                    resultsHeading.style.display = 'none';
+                });
+        }
+        
+        // Event listeners
+        searchButton.addEventListener('click', performSearch);
+        
+        searchInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
     </script>
 </body>
+</html>
