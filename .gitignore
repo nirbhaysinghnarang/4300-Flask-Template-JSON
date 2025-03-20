@@ -2,7 +2,7 @@ env/
 .DS_Store
 Docker/__pycache__
 
-venv/
+4300_venv/
 
 *.pyc
 __pycache__/
@@ -18,3 +18,4 @@ build/
 *.egg-info/
 helpers/*
 json_template/
+backend/data/scripts
