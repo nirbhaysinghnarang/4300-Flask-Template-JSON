@@ -24,7 +24,7 @@
         }
         
         .search-container {
-            margin: 40px auto;
+            margin: 20px auto;
             max-width: 600px;
             display: flex;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -54,6 +54,73 @@
         
         #search-button:hover {
             background-color: #5d4e3d;
+        }
+        
+        .year-range-container {
+            margin: 20px auto 40px;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 20px;
+        }
+        
+        .year-range-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            margin: 0 0 15px;
+            color: #4a3933;
+        }
+        
+        .year-range {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .year-input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .year-input-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4a3933;
+        }
+        
+        .year-input-group input {
+            padding: 12px 16px;
+            border: 1px solid #e0d6cc;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: 'Source Sans Pro', sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .year-input-group input:focus {
+            border-color: #7d6852;
+            box-shadow: 0 0 0 2px rgba(125, 104, 82, 0.1);
+            outline: none;
+        }
+        
+        .year-input-group input.error {
+            border-color: #e74c3c;
+            background-color: rgba(231, 76, 60, 0.05);
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .error-message.visible {
+            display: block;
         }
         
         .results-heading {
@@ -265,6 +332,23 @@
             <button id="search-button">Explore</button>
         </div>
         
+        <div class="year-range-container">
+            <h3 class="year-range-title">Filter by Time Period</h3>
+            <div class="year-range">
+                <div class="year-input-group">
+                    <label for="min-year">From Year</label>
+                    <input type="text" id="min-year" placeholder="e.g., 2500BC">
+                    <span class="error-message" id="min-year-error">Please enter a valid year (e.g., 2500BC, 1492, 2012AD)</span>
+                </div>
+                
+                <div class="year-input-group">
+                    <label for="max-year">To Year</label>
+                    <input type="text" id="max-year" placeholder="e.g., 2012">
+                    <span class="error-message" id="max-year-error">Please enter a valid year (e.g., 2500BC, 1492, 2012AD)</span>
+                </div>
+            </div>
+        </div>
+        
         <h2 class="results-heading" id="results-heading" style="display: none;">Discovered Events</h2>
         <div id="results-container">
         </div>
@@ -276,7 +360,43 @@
         const searchButton = document.getElementById('search-button');
         const resultsContainer = document.getElementById('results-container');
         const resultsHeading = document.getElementById('results-heading');
+        const minYear = document.getElementById('min-year');
+        const maxYear = document.getElementById('max-year');
+        const minYearError = document.getElementById('min-year-error');
+        const maxYearError = document.getElementById('max-year-error');
         
+        // Validate year format
+        const validateYear = (year) => {
+            if (year === "") {
+                return true;
+            }
+            const yearRegex = /^\d{1,4}BC$|\d{1,4}$|\d{1,4}AD$/i;
+            return yearRegex.test(year);
+        };
+        
+        // Add input validation
+        if (minYear && maxYear) {
+            minYear.addEventListener('input', () => {
+                if (!validateYear(minYear.value)) {
+                    minYear.classList.add('error');
+                    minYearError.classList.add('visible');
+                } else {
+                    minYear.classList.remove('error');
+                    minYearError.classList.remove('visible');
+                }
+            });
+            
+            maxYear.addEventListener('input', () => {
+                if (!validateYear(maxYear.value)) {
+                    maxYear.classList.add('error');
+                    maxYearError.classList.add('visible');
+                } else {
+                    maxYear.classList.remove('error');
+                    maxYearError.classList.remove('visible');
+                }
+            });
+        }
+
         function toggleExpanded(button) {
             const expandedDiv = button.nextElementSibling;
             const isHidden = expandedDiv.style.display === 'none' || expandedDiv.style.display === '';
@@ -298,6 +418,25 @@
         
         function performSearch() {
             const query = searchInput.value.trim();
+            
+            // Validate year inputs before search
+            let validYears = true;
+            if (minYear.value && !validateYear(minYear.value)) {
+                minYear.classList.add('error');
+                minYearError.classList.add('visible');
+                validYears = false;
+            }
+            
+            if (maxYear.value && !validateYear(maxYear.value)) {
+                maxYear.classList.add('error');
+                maxYearError.classList.add('visible');
+                validYears = false;
+            }
+            
+            if (!validYears) {
+                return; // Don't proceed if years are invalid
+            }
+            
             if (query === '') {
                 resultsContainer.innerHTML = '<div class="no-results"><p>Please enter a search term to discover historical events.</p></div>';
                 resultsHeading.style.display = 'none';
@@ -305,7 +444,11 @@
             }            
             resultsContainer.innerHTML = '<div class="loading">Searching through history...</div>';
             resultsHeading.style.display = 'block';            
-            fetch("/historical-sites?" + new URLSearchParams({ query: query }).toString())
+            const searchParams = new URLSearchParams({ query: query });
+            if (minYear.value) searchParams.append('minYeear', minYear.value);
+            if (maxYear.value) searchParams.append('maxYear', maxYear.value);
+            
+            fetch("/historical-sites?" + searchParams.toString())
                 .then(response => response.json())
                 .then(data => {
                     resultsContainer.innerHTML = '';
@@ -462,7 +605,6 @@
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
-                    throw error
                     resultsContainer.innerHTML = '<div class="no-results"><p>An error occurred while searching. Please try again.</p></div>';
                     resultsHeading.style.display = 'none';
                 });

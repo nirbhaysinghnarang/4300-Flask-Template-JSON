@@ -21,3 +21,4 @@ json_template/
 .env
 
 backend/data/scripts
+backend/data/scripts/*
