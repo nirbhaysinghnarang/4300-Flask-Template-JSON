@@ -13,8 +13,16 @@ os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..", os.curdir))
 
 
 def assign_era(year_str):
-
-    year_num = int(year_str)
+    try:
+        year_str = str(year_str).strip()
+        if 'BC' in year_str.upper():
+            year_num = -int(year_str.replace('BC', '').strip())
+        elif 'AD' in year_str.upper():
+            year_num = int(year_str.replace('AD', '').strip())
+        else:
+            year_num = int(year_str)
+    except:
+        return "Unknown"
 
     if year_num <= -3000:
         return "Prehistoric"
@@ -40,7 +48,6 @@ csv_file_path = os.path.join(current_directory, 'data', 'final_data.csv')
 
 historical_df = pd.read_csv(csv_file_path)
 historical_df['era'] = historical_df['Year'].apply(assign_era)
-
 
 weight_processor = WeightedTfidfProcessor(
     historical_df.to_dict('records'),
