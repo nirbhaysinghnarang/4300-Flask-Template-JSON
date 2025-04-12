@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
         eventTemplate: document.getElementById('event-template'),
         redditPostTemplate: document.getElementById('reddit-post-template'),
         detailItemTemplate: document.getElementById('detail-item-template'), 
-        socialMediaWeight: document.getElementById('weigh-social-media')
+        socialMediaWeight: document.getElementById('weigh-social-media'),
+        gloveContainer: document.getElementById('use-glove')
     };
     const configElement = document.getElementById('app-config');
     config = {
@@ -80,7 +81,8 @@ function performSearch() {
     if (elements.minYear.value) searchParams.append('minYear', elements.minYear.value);
     if (elements.maxYear.value) searchParams.append('maxYear', elements.maxYear.value);
     if(elements.socialMediaWeight.checked) searchParams.append('useReddit', 'true');
-
+    if(elements.gloveContainer.checked) searchParams.append('useGlove', 'true');
+    console.log("FETCHING")
     fetch(`${config.apiEndpoint}?${searchParams.toString()}`)
         .then(response => {
             if (!response.ok) {
