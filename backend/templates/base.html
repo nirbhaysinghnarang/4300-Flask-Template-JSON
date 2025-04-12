@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historical Events Explorer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,623 +12,119 @@
         rel="stylesheet">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
-    <style>
-        body {
-            font-family: 'Source Sans Pro', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f5f1;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        .search-container {
-            margin: 20px auto;
-            max-width: 600px;
-            display: flex;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border-radius: 50px;
-            overflow: hidden;
-        }
-
-        #search-input {
-            flex: 1;
-            padding: 16px 24px;
-            font-size: 18px;
-            border: none;
-            outline: none;
-            font-family: 'Source Sans Pro', sans-serif;
-        }
-
-        #search-button {
-            padding: 16px 32px;
-            font-size: 18px;
-            background-color: #7d6852;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            font-weight: 600;
-        }
-
-        #search-button:hover {
-            background-color: #5d4e3d;
-        }
-
-        .year-range-container {
-            margin: 20px auto 40px;
-            max-width: 600px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            padding: 20px;
-        }
-
-        .year-range-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 18px;
-            margin: 0 0 15px;
-            color: #4a3933;
-        }
-
-        .year-range {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .year-input-group {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-width: 120px;
-        }
-
-        .year-input-group label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #4a3933;
-        }
-
-        .year-input-group input {
-            padding: 12px 16px;
-            border: 1px solid #e0d6cc;
-            border-radius: 6px;
-            font-size: 16px;
-            font-family: 'Source Sans Pro', sans-serif;
-            transition: all 0.3s;
-        }
-
-        .year-input-group input:focus {
-            border-color: #7d6852;
-            box-shadow: 0 0 0 2px rgba(125, 104, 82, 0.1);
-            outline: none;
-        }
-
-        .year-input-group input.error {
-            border-color: #e74c3c;
-            background-color: rgba(231, 76, 60, 0.05);
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 12px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .error-message.visible {
-            display: block;
-        }
-
-        .results-heading {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px;
-            margin: 40px 0 20px;
-            color: #4a3933;
-            border-bottom: 2px solid #e0d6cc;
-            padding-bottom: 10px;
-        }
-
-        .result-item {
-            background-color: white;
-            margin-bottom: 30px;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .result-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-        }
-
-        .result-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 5px;
-            height: 100%;
-            background-color: #7d6852;
-        }
-
-        .result-title {
-            font-family: 'Playfair Display', serif;
-            font-weight: bold;
-            font-size: 24px;
-            color: #4a3933;
-            margin-bottom: 10px;
-        }
-
-        .result-metadata {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        .meta-item {
-            background-color: #f0ebe5;
-            padding: 5px 12px;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .meta-item i {
-            opacity: 0.7;
-        }
-
-        .result-description {
-            font-size: 16px;
-            line-height: 1.7;
-            margin-bottom: 15px;
-        }
-
-        .result-details {
-            display: flex;
-            justify-content: space-between;
-            background-color: #f8f5f1;
-            padding: 12px 15px;
-            border-radius: 6px;
-            margin-top: 15px;
-            font-size: 15px;
-        }
-
-        .significance {
-            display: flex;
-            align-items: center;
-        }
-
-        .significance-bar {
-            width: 100px;
-            height: 8px;
-            background-color: #e0d6cc;
-            border-radius: 4px;
-            margin-left: 10px;
-            overflow: hidden;
-        }
-
-        .significance-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #7d6852, #a68c69);
-        }
-
-        .event-expanded {
-            margin-top: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            display: none;
-        }
-
-        .expanded-tabs {
-            display: flex;
-            background-color: #f0ebe5;
-            border-bottom: 1px solid #e0d6cc;
-        }
-
-        .tab {
-            padding: 12px 20px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-
-        .tab.active {
-            background-color: #fff;
-            border-top: 3px solid #7d6852;
-            margin-top: -3px;
-        }
-
-        .tab:hover:not(.active) {
-            background-color: #e5dfd5;
-        }
-
-        .tab-content {
-            padding: 20px;
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .tab-content h3 {
-            font-family: 'Playfair Display', serif;
-            color: #4a3933;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-
-        .map-container {
-            height: 250px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            overflow: hidden;
-            width: 100%;
-            /* Make map full width */
-        }
-
-        .detail-item {
-            margin-bottom: 15px;
-        }
-
-        .detail-item strong {
-            display: block;
-            color: #7d6852;
-            margin-bottom: 5px;
-        }
-
-        .expand-button {
-            background-color: #f0ebe5;
-            border: none;
-            padding: 8px 15px;
-            margin-top: 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .expand-button:hover {
-            background-color: #e0d6cc;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-style: italic;
-            color: #7d6852;
-            font-size: 18px;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #7d6852;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </head>
 
 <body>
+    
+    
     <div class="container">
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Search historical events...">
             <button id="search-button">Explore</button>
         </div>
-
+        <div id="app-config" data-mapbox-token="{{ mapbox_token }}"></div>
         <div class="year-range-container">
             <h3 class="year-range-title">Filter by Time Period</h3>
             <div class="year-range">
                 <div class="year-input-group">
                     <label for="min-year">From Year</label>
                     <input type="text" id="min-year" placeholder="e.g., 2500BC">
-                    <span class="error-message" id="min-year-error">Please enter a valid year (e.g., 2500BC, 1492,
-                        2012AD)</span>
+                    <span class="error-message" id="min-year-error">Please enter a valid year (e.g., 2500BC, 1492, 2012AD)</span>
                 </div>
 
                 <div class="year-input-group">
                     <label for="max-year">To Year</label>
                     <input type="text" id="max-year" placeholder="e.g., 2012">
-                    <span class="error-message" id="max-year-error">Please enter a valid year (e.g., 2500BC, 1492,
-                        2012AD)</span>
+                    <span class="error-message" id="max-year-error">Please enter a valid year (e.g., 2500BC, 1492, 2012AD)</span>
                 </div>
             </div>
         </div>
 
         <h2 class="results-heading" id="results-heading" style="display: none;">Discovered Events</h2>
-        <div id="results-container">
-        </div>
+        <div id="results-container"></div>
     </div>
 
-    <script>
-        // Get elements
-        const searchInput = document.getElementById('search-input');
-        const searchButton = document.getElementById('search-button');
-        const resultsContainer = document.getElementById('results-container');
-        const resultsHeading = document.getElementById('results-heading');
-        const minYear = document.getElementById('min-year');
-        const maxYear = document.getElementById('max-year');
-        const minYearError = document.getElementById('min-year-error');
-        const maxYearError = document.getElementById('max-year-error');
+    <template id="event-template">
+        <div class="result-item">
+            <div class="result-title"></div>
+            <div class="result-metadata"></div>
+            <div class="result-description"></div>
+            <div class="result-details">
+                <div class="significance">
+                    <span>Historical Significance:</span>
+                    <div class="significance-bar">
+                        <div class="significance-fill"></div>
+                    </div>
+                    <span class="significance-value" style="margin-left: 8px;"></span>
+                </div>
+            </div>
+            <button class="expand-button">View Full Details ↓</button>
+            <div class="event-expanded">
+                <div class="expanded-tabs">
+                    <div class="tab active" data-tab="details">Details</div>
+                    <div class="tab" data-tab="context">Context</div>
+                    <div class="tab" data-tab="consequences">Consequences</div>
+                    <div class="tab" data-tab="significance">Significance</div>
+                    <div class="tab" data-tab="facts">Interesting Facts</div>
+                    <div class="tab" data-tab="reddit">Reddit Discussions</div>
+                </div>
+                <div class="tab-contents">
+                    <div class="tab-content active" id="details-content">
+                        <h3>Event Details</h3>
+                        <div class="map-container"></div>
+                        <div class="detail-items"></div>
+                    </div>
+                    <div class="tab-content" id="context-content">
+                        <h3>Historical Context</h3>
+                        <p class="context-text"></p>
+                    </div>
+                    <div class="tab-content" id="consequences-content">
+                        <h3>Immediate Consequences</h3>
+                        <p class="consequences-text"></p>
+                    </div>
+                    <div class="tab-content" id="significance-content">
+                        <h3>Long-term Significance</h3>
+                        <p class="significance-text"></p>
+                    </div>
+                    <div class="tab-content" id="facts-content">
+                        <h3>Interesting Facts</h3>
+                        <p class="facts-text"></p>
+                    </div>
+                    <div class="tab-content" id="reddit-content">
+                        <h3>Reddit Discussions</h3>
+                        <div class="reddit-posts-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
 
-        // Validate year format
-        const validateYear = (year) => {
-            if (year === "") {
-                return true;
-            }
-            const yearRegex = /^\d{1,4}BC$|\d{1,4}$|\d{1,4}AD$/i;
-            return yearRegex.test(year);
-        };
+    <template id="reddit-post-template">
+        <div class="reddit-post">
+            <a class="reddit-post-link" target="_blank">View on Reddit</a>
 
-        // Add input validation
-        if (minYear && maxYear) {
-            minYear.addEventListener('input', () => {
-                if (!validateYear(minYear.value)) {
-                    minYear.classList.add('error');
-                    minYearError.classList.add('visible');
-                } else {
-                    minYear.classList.remove('error');
-                    minYearError.classList.remove('visible');
-                }
-            });
+            <div class="reddit-post-title"></div>
+            <div class="reddit-post-author"></div>
+            <div class="reddit-post-date"></div>
+            <div class="reddit-post-meta">
+                <span class="reddit-post-subreddit"></span>
+                <div class="reddit-post-indicators">
+                    <span class="reddit-post-score"></span>
+                    <span class="reddit-post-comments"></span>
+                </div>
+            </div>
+        </div>
+    </template>
 
-            maxYear.addEventListener('input', () => {
-                if (!validateYear(maxYear.value)) {
-                    maxYear.classList.add('error');
-                    maxYearError.classList.add('visible');
-                } else {
-                    maxYear.classList.remove('error');
-                    maxYearError.classList.remove('visible');
-                }
-            });
-        }
+    <template id="detail-item-template">
+        <div class="detail-item">
+            <strong></strong>
+            <span></span>
+        </div>
+    </template>
 
-        function toggleExpanded(button) {
-            const expandedDiv = button.nextElementSibling;
-            const isHidden = expandedDiv.style.display === 'none' || expandedDiv.style.display === '';
-
-            expandedDiv.style.display = isHidden ? 'block' : 'none';
-            button.textContent = isHidden ? 'Hide Details ↑' : 'View Full Details ↓';
-        }
-
-        function switchTab(tabElement, contentId) {
-            const tabGroup = tabElement.parentElement;
-            tabGroup.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            tabElement.classList.add('active');
-            const tabContentContainer = tabGroup.nextElementSibling;
-            tabContentContainer.parentElement.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(contentId).classList.add('active');
-        }
-
-        function performSearch() {
-            const query = searchInput.value.trim();
-
-            // Validate year inputs before search
-            let validYears = true;
-            if (minYear.value && !validateYear(minYear.value)) {
-                minYear.classList.add('error');
-                minYearError.classList.add('visible');
-                validYears = false;
-            }
-
-            if (maxYear.value && !validateYear(maxYear.value)) {
-                maxYear.classList.add('error');
-                maxYearError.classList.add('visible');
-                validYears = false;
-            }
-
-            if (!validYears) {
-                return; // Don't proceed if years are invalid
-            }
-
-            if (query === '') {
-                resultsContainer.innerHTML = '<div class="no-results"><p>Please enter a search term to discover historical events.</p></div>';
-                resultsHeading.style.display = 'none';
-                return;
-            }
-            resultsContainer.innerHTML = '<div class="loading">Searching through history...</div>';
-            resultsHeading.style.display = 'block';
-            const searchParams = new URLSearchParams({ query: query });
-            if (minYear.value) searchParams.append('minYeear', minYear.value);
-            if (maxYear.value) searchParams.append('maxYear', maxYear.value);
-
-            fetch("/historical-sites?" + searchParams.toString())
-                .then(response => response.json())
-                .then(data => {
-                    resultsContainer.innerHTML = '';
-                    if (data.length > 0) {
-                        data.forEach(event => {
-                            const resultItem = document.createElement('div');
-                            resultItem.className = 'result-item';
-                            let yearDisplay = 'Unknown year';
-                            if (event.row && event.row.Year) {
-                                try {
-                                    const yearNum = parseInt(event.row.Year);
-                                    if (!isNaN(yearNum)) {
-                                        yearDisplay = yearNum > 0 ? yearNum + ' CE' : Math.abs(yearNum) + ' BCE';
-                                    }
-                                } catch (e) {
-                                    yearDisplay = event.row.Year.toString();
-                                }
-                            }
-                            let metadataHTML = `
-                                <div class="meta-item"><i>🗓️</i> ${yearDisplay}</div>
-                                <div class="meta-item"><i>🏛️</i> ${event.row && event.row.era || 'Unknown era'}</div>
-
-                            `;
-
-                            if (event.row && event.row['Place Name'] && event.row['Place Name'] !== 'undefined' && event.row['Place Name'] !== 'null') {
-                                metadataHTML += `<div class="meta-item"><i>📍</i> ${event.row['Place Name']}${event.row.Country && event.row.Country !== 'undefined' && event.row.Country !== 'null' ? ', ' + event.row.Country : ''}</div>`;
-                            } else if (event.row && event.row.Country && event.row.Country !== 'undefined' && event.row.Country !== 'null') {
-                                metadataHTML += `<div class="meta-item"><i>📍</i> ${event.row.Country}</div>`;
-                            } else {
-                                metadataHTML += `<div class="meta-item"><i>📍</i> Location unknown</div>`;
-                            }
-                            const significanceVal = event.score ? Math.round((event.score * 100)) / 10 : 0;
-                            const significancePct = (significanceVal / 10) * 100;
-                            resultItem.innerHTML = `
-                                <div class="result-title">${event.row ? event.row['Name of Incident'] : event.document.split('(')[0].trim()}</div>
-                                <div class="result-metadata">
-                                    ${metadataHTML}
-                                </div>
-                                <div class="result-description">${event.row && event.row.description || 'No description available.'}</div>
-                                <div class="result-details">
-                                    <div class="significance">
-                                        <span>Historical Significance:</span>
-                                        <div class="significance-bar">
-                                            <div class="significance-fill" style="width: ${significancePct}%"></div>
-                                        </div>
-                                        <span style="margin-left: 8px;">${significanceVal.toFixed(1)}/10</span>
-                                    </div>
-                                </div>
-                                <button class="expand-button" onclick="toggleExpanded(this)">View Full Details ↓</button>
-                                
-                                <div class="event-expanded">
-                                    <div class="expanded-tabs">
-                                        <div class="tab active" onclick="switchTab(this, 'details-${data.indexOf(event)}')">Details</div>
-                                        <div class="tab" onclick="switchTab(this, 'context-${data.indexOf(event)}')">Context</div>
-                                        <div class="tab" onclick="switchTab(this, 'consequences-${data.indexOf(event)}')">Consequences</div>
-                                        <div class="tab" onclick="switchTab(this, 'significance-${data.indexOf(event)}')">Significance</div>
-                                        <div class="tab" onclick="switchTab(this, 'facts-${data.indexOf(event)}')">Interesting Facts</div>
-                                    </div>
-                                    
-                                    <div id="details-${data.indexOf(event)}" class="tab-content active">
-                                        <h3>Event Details</h3>
-                                        ${event.row && event.row.longitude && event.row.latitude ? `
-                                        <div class="map-container" id="map-${data.indexOf(event)}"></div>
-                                        ` : ''}
-                                        
-                                        <div class="detail-item">
-                                            <strong>Name of Incident</strong>
-                                            ${event.row ? event.row['Name of Incident'] : event.document.split('(')[0].trim() || 'Unknown'}
-                                        </div>
-                                        
-                                        <div class="detail-item">
-                                            <strong>Type of Event</strong>
-                                            ${event.row && event.row['Type of Event'] || 'Unknown'}
-                                        </div>
-                                        
-                                        <div class="detail-item">
-                                            <strong>Date</strong>
-                                            ${yearDisplay}
-                                        </div>
-                                        
-                                        <div class="detail-item">
-                                            <strong>Location</strong>
-                                            ${event.row && event.row['Place Name'] ? event.row['Place Name'] : ''} ${event.row && event.row.Country ? (event.row['Place Name'] ? ', ' : '') + event.row.Country : 'Unknown location'}
-                                        </div>
-                                        
-                                        <div class="detail-item">
-                                            <strong>Important Person/Group</strong>
-                                            ${event.row && event.row['Important Person/Group Responsible'] || 'Not specified'}
-                                        </div>
-                                        
-                                        <div class="detail-item">
-                                            <strong>Affected Population</strong>
-                                            ${event.row && event.row['Affected Population'] || 'Not specified'}
-                                        </div>
-                                        
-                                        <div class="detail-item">
-                                            <strong>Impact</strong>
-                                            ${event.row && event.row['Impact'] || 'Not specified'}
-                                        </div>
-                                        
-                                        <div class="detail-item">
-                                            <strong>Outcome</strong>
-                                            ${event.row && event.row['Outcome'] || 'Unknown'}
-                                        </div>
-                                    </div>
-                                    
-                                    <div id="context-${data.indexOf(event)}" class="tab-content">
-                                        <h3>Historical Context</h3>
-                                        <p>${event.row && event.row['context'] || 'No context information available for this event.'}</p>
-                                    </div>
-                                    
-                                    <div id="consequences-${data.indexOf(event)}" class="tab-content">
-                                        <h3>Immediate Consequences</h3>
-                                        <p>${event.row && event.row['immediate_consequences'] || 'No immediate consequences information available for this event.'}</p>
-                                    </div>
-                                    
-                                    <div id="significance-${data.indexOf(event)}" class="tab-content">
-                                        <h3>Long-term Significance</h3>
-                                        <p>${event.row && event.row['long_term_significance'] || 'No long-term significance information available for this event.'}</p>
-                                    </div>
-                                    
-                                    <div id="facts-${data.indexOf(event)}" class="tab-content">
-                                        <h3>Interesting Facts</h3>
-                                        <p>${event.row && event.row['interesting_facts'] || 'No interesting facts available for this event.'}</p>
-                                    </div>
-                                </div>
-                            `;
-                            resultsContainer.appendChild(resultItem);
-                            if (event.row && event.row.longitude && event.row.latitude) {
-                                setTimeout(() => {
-                                    const coords = [
-                                        parseFloat(event.row.longitude),
-                                        parseFloat(event.row.latitude)
-                                    ];
-                                    if (coords && coords[0] && coords[1] && document.getElementById(`map-${data.indexOf(event)}`)) {
-                                        const mapboxToken = '{{ mapbox_token }}';
-                                        mapboxgl.accessToken = mapboxToken;
-                                        const map = new mapboxgl.Map({
-                                            container: `map-${data.indexOf(event)}`,
-                                            style: 'mapbox://styles/nirbhaysinghnarang/clibkhjth02vf01quas1vbm0s',
-                                            center: coords,
-                                            zoom: 4
-                                        });
-                                        new mapboxgl.Marker({ color: '#7d6852' })
-                                            .setLngLat(coords)
-                                            .addTo(map);
-                                    }
-                                }, 100);
-                            }
-                        });
-                    } else {
-                        // No results
-                        resultsContainer.innerHTML = '<div class="no-results"><p>No historical events found matching your search.</p></div>';
-                    }
-                })
-                .catch(error => {
-                    console.error("Error fetching data:", error);
-                    resultsContainer.innerHTML = '<div class="no-results"><p>An error occurred while searching. Please try again.</p></div>';
-                    resultsHeading.style.display = 'none';
-                });
-        }
-
-        // Event listeners
-        searchButton.addEventListener('click', performSearch);
-
-        searchInput.addEventListener('keyup', function (event) {
-            if (event.key === 'Enter') {
-                performSearch();
-            }
-        });
-    </script>
 </body>
 
 </html>

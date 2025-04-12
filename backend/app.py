@@ -1,3 +1,4 @@
+
 import json
 import os
 import numpy as np
@@ -43,10 +44,12 @@ def assign_era(year_str):
 
 
 current_directory = os.path.dirname(os.path.abspath(__file__))
-json_file_path = os.path.join(current_directory, 'init.json')
-csv_file_path = os.path.join(current_directory, 'data', 'final_data.csv')
+json_file_path = os.path.join(current_directory, 'data', 'final_data_with_reddit.json')
 
-historical_df = pd.read_csv(csv_file_path)
+with open(json_file_path, 'r', encoding='utf-8') as f:
+    historical_data = json.load(f)
+
+historical_df = pd.DataFrame(historical_data)
 historical_df['era'] = historical_df['Year'].apply(assign_era)
 
 weight_processor = WeightedTfidfProcessor(
@@ -66,7 +69,6 @@ CORS(app)
 @app.route("/")
 def home():
     mapbox_token = os.environ.get('MAPBOX_ACCESS_TOKEN')
-
     return render_template('base.html', title="World Heritage Explorer", mapbox_token=mapbox_token)
 
 
@@ -87,7 +89,6 @@ def historical_search():
     ).filter_by_year()
 
     return jsonify(filtered_results)
-
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=8080)
