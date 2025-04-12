@@ -11,6 +11,7 @@ from utils import assign_era, get_data
 from processor import WeightedTfidfProcessor
 from lda_processor import LDAProcessor
 from glove_processor import GloVEProcessor
+from svd_processor import SVDTextProcessor
 from filters import Filters
 
 
@@ -20,6 +21,8 @@ historical_df['era'] = historical_df['Year'].apply(assign_era)
 historical_df["Name of Incident"] = historical_df["Name of Incident"].apply(
     lambda x: str(x).strip().replace("Unknown", "-") if pd.notnull(x) else ""
 )
+
+
 weight_processor_social_media = WeightedTfidfProcessor(
     historical_df.to_dict('records'),
     weight_fields=['reddit_posts'],
@@ -32,7 +35,6 @@ weight_processor_no_social_media = WeightedTfidfProcessor(
     weight_factor=2
 )
 
-
 glove_processor_no_social_media = GloVEProcessor(
     historical_df.to_dict('records'),
     weight_fields=['Name of Incident', 'description'],
@@ -40,6 +42,20 @@ glove_processor_no_social_media = GloVEProcessor(
 )
 
 glove_processor_social_media = GloVEProcessor(
+    historical_df.to_dict('records'),
+    weight_fields=['reddit_posts'],
+    weight_factor=20
+)
+
+
+svd_processor_no_social_media = SVDTextProcessor(
+    historical_df.to_dict('records'),
+    weight_fields=['Name of Incident', 'description'],
+    weight_factor=10
+)
+
+
+svd_processor_social_media = SVDTextProcessor(
     historical_df.to_dict('records'),
     weight_fields=['reddit_posts'],
     weight_factor=20
@@ -57,6 +73,11 @@ def glove_search(query, use_reddit, top_n=5):
     return glove_processor_no_social_media.search(query, top_n)
 
 
+def svd_search(query, use_reddit, top_n=5):
+    if use_reddit:
+        return svd_processor_social_media.search(query, top_n)
+    return svd_processor_no_social_media.search(query, top_n)
+
 app = Flask(__name__)
 CORS(app)
 
@@ -73,23 +94,34 @@ def historical_search():
     min_year = request.args.get("minYear", "2500BC")
     max_year = request.args.get("maxYear", "2012")
     use_reddit = request.args.get("useReddit", False)
-    use_glove = request.args.get("useGlove", False)
-
+    embedding_method = request.args.get("embeddingMethod","TF")
+    
+    print(request.args)
+    if embedding_method not in [
+        "TF",
+        "GLOVE",
+        "SVD"
+    ]:
+        embedding_method = "TF"
+        
+    
     print("Query:", query)
     print("Min Year:", min_year)
     print("Max Year:", max_year)
     print("Use Reddit:", use_reddit)
-    print("Use GloVe:", use_glove)
+    print("Embedding Method:", embedding_method)
     
     if not query:
         return jsonify([])
 
-
-    if use_glove:
-        results = glove_search(query, use_reddit)
-    else:
+    if embedding_method == "TF":
         results = tfidf_search(query, use_reddit)
-        
+    elif embedding_method == "GLOVE":
+        results = glove_search(query, use_reddit)
+    elif embedding_method == "SVD":
+        results = svd_search(query, use_reddit)
+    
+    results = svd_processor_no_social_media.search(query, top_n=5)
         
     filtered_results = Filters(
         results,

@@ -31,7 +31,6 @@ class GloVEProcessor:
         ]
     
     def _load_glove_model(self):
-        """Load a memory-efficient version of GloVe"""
         try:
             return api.load(f"glove-wiki-gigaword-{self.vector_dim}")
         except Exception as e:
@@ -40,7 +39,6 @@ class GloVEProcessor:
             raise Exception("Could not load GloVe model. Please download it manually or ensure gensim-data is installed.")
     
     def _clean_text(self, text):
-        """Clean text to reduce memory usage"""
         if not isinstance(text, str):
             return ""
         text = re.sub(r'[^a-zA-Z0-9\s]', '', text.lower())

@@ -75,15 +75,15 @@ class WeightedTfidfProcessor:
         from sklearn.metrics.pairwise import cosine_similarity
         
         query_vector = self.vectorizer.transform([query])
+        print(query_vector)
         similarities = cosine_similarity(query_vector, self.tfidf_matrix).flatten()
         
         top_indices = similarities.argsort()[::-1][:top_n]
-        
         results = []
         for idx in top_indices:
             row = self.rows[idx]
             score = similarities[idx]
-            if score > 0:
+            if score >= 0:
                 
                 results.append({
                     'document': self.doc_labels[idx],

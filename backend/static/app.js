@@ -16,8 +16,12 @@ document.addEventListener('DOMContentLoaded', function() {
         redditPostTemplate: document.getElementById('reddit-post-template'),
         detailItemTemplate: document.getElementById('detail-item-template'), 
         socialMediaWeight: document.getElementById('weigh-social-media'),
-        gloveContainer: document.getElementById('use-glove')
+        tfIdfMethod: document.getElementById('tfidf-method'),
+        gloveMethod: document.getElementById('glove-method'),
+        svdMethod: document.getElementById('svd-method')
     };
+
+    console.log(elements)
     const configElement = document.getElementById('app-config');
     config = {
         mapboxToken: configElement ? configElement.getAttribute('data-mapbox-token') : '',
@@ -81,10 +85,25 @@ function performSearch() {
     if (elements.minYear.value) searchParams.append('minYear', elements.minYear.value);
     if (elements.maxYear.value) searchParams.append('maxYear', elements.maxYear.value);
     if(elements.socialMediaWeight.checked) searchParams.append('useReddit', 'true');
-    if(elements.gloveContainer.checked) searchParams.append('useGlove', 'true');
+
+
+    if(elements.tfIdfMethod.checked) {
+        embeddingMethod = "TF"
+    } else if (elements.svdMethod.checked) {
+        embeddingMethod = "SVD"
+    } else if (elements.gloveMethod.checked) {
+        embeddingMethod = "GLOVE"
+    }
+
+    searchParams.append('embeddingMethod', embeddingMethod);
+
+
+    console.log(elements.tfIdfMethod.checked)
     console.log("FETCHING")
     fetch(`${config.apiEndpoint}?${searchParams.toString()}`)
         .then(response => {
+
+     
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -108,6 +127,7 @@ function showNoResults(message) {
 }
 
 function displayResults(data) {
+    //scroll to bottom of document.getElementById(results-container)
     elements.resultsContainer.innerHTML = '';
     
     if (data.length === 0) {
@@ -122,6 +142,8 @@ function displayResults(data) {
         if (event.row && event.row.longitude && event.row.latitude) {
             setTimeout(() => {
                 initializeMap(event, resultElement.querySelector('.map-container'), index);
+                document.getElementById('results-container').scrollIntoView({ behavior: 'smooth' });
+
             }, 100);
         }
     });

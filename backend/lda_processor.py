@@ -89,7 +89,6 @@ class LDAProcessor:
         return topics
     
     def get_document_topics(self, doc_idx=None):
-        """Get the topic distribution for documents"""
         if doc_idx is not None:
             return {
                 'document': self.doc_labels[doc_idx],
