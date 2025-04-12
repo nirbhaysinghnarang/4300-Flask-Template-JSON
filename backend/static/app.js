@@ -14,11 +14,10 @@ document.addEventListener('DOMContentLoaded', function() {
         maxYearError: document.getElementById('max-year-error'),
         eventTemplate: document.getElementById('event-template'),
         redditPostTemplate: document.getElementById('reddit-post-template'),
-        detailItemTemplate: document.getElementById('detail-item-template')
+        detailItemTemplate: document.getElementById('detail-item-template'), 
+        socialMediaWeight: document.getElementById('weigh-social-media')
     };
-
     const configElement = document.getElementById('app-config');
-
     config = {
         mapboxToken: configElement ? configElement.getAttribute('data-mapbox-token') : '',
         apiEndpoint: '/historical-sites',
@@ -80,6 +79,8 @@ function performSearch() {
     const searchParams = new URLSearchParams({ query });
     if (elements.minYear.value) searchParams.append('minYear', elements.minYear.value);
     if (elements.maxYear.value) searchParams.append('maxYear', elements.maxYear.value);
+    if(elements.socialMediaWeight.checked) searchParams.append('useReddit', 'true');
+
     fetch(`${config.apiEndpoint}?${searchParams.toString()}`)
         .then(response => {
             if (!response.ok) {

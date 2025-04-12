@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 
 class WeightedTfidfProcessor:
-    def __init__(self, rows, weight_fields=None, weight_factor=2.0):
+    def __init__(self, rows, weight_fields=None,weight_factor=5.0):
         self.rows = rows
-        self.weight_fields = weight_fields or ['Name of Incident', 'description']
+        self.weight_fields = weight_fields or ['Name of Incident', 'description', 'reddit_posts']
         self.weight_factor = weight_factor
         self.vectorizer = TfidfVectorizer(
             lowercase=True,
@@ -27,8 +27,7 @@ class WeightedTfidfProcessor:
         corpus = []
         
         for row in self.rows:
-            document_parts = []
-            
+            document_parts = []            
             for key, value in row.items():
                 if value and isinstance(value, (str, int, float)):
                     document_parts.append(str(value))
@@ -85,6 +84,7 @@ class WeightedTfidfProcessor:
             row = self.rows[idx]
             score = similarities[idx]
             if score > 0:
+                
                 results.append({
                     'document': self.doc_labels[idx],
                     'score': score,

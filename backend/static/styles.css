@@ -455,3 +455,44 @@ h1, h2, h3, h4, h5, h6 {
         margin-bottom: var(--spacing-sm);
     }
 }
+
+.social-media-weight-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: var(--spacing-md) 0;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.social-media-weight-container input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--primary-color);
+    border-radius: var(--border-radius-small);
+    margin-right: var(--spacing-sm);
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.social-media-weight-container input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+}
+
+.social-media-weight-container input[type="checkbox"]:checked::before {
+    content: '✓';
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+}
+
+.social-media-weight-container label {
+    color: var(--secondary-color);
+    font-size: 14px;
+    cursor: pointer;
+}
