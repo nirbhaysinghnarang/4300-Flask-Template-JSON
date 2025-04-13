@@ -38,3 +38,16 @@ def get_data():
     with open(json_file_path, 'r', encoding='utf-8') as f:
         historical_data = json.load(f)
     return historical_data
+
+
+def get_rows_to_remove():
+    import os
+    import json
+    os.environ['ROOT_PATH'] = os.path.abspath(os.path.join("..", os.curdir))
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    json_file_path = os.path.join(current_directory, 'data', 'filtered_verified_reddit_posts.json')
+
+    with open(json_file_path, 'r', encoding='utf-8') as f:
+        historical_data = json.load(f)
+        
+    return [datum['Name of Incident'] for datum in historical_data]

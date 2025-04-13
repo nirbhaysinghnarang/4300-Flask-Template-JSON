@@ -17,8 +17,6 @@
 </head>
 
 <body>
-    
-    
     <div class="container">
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Search historical events...">
@@ -26,60 +24,64 @@
         </div>
         <div id="app-config" data-mapbox-token="{{ mapbox_token }}"></div>
         
-        <div style="display: flex; flex-direction: column; gap: 0px;align-items: center;">
-            <div class="year-range-container">
-                <h3 class="year-range-title">Filter by Time Period</h3>
-                <div class="year-range">
-                    <div class="year-input-group">
-                        <label for="min-year">From Year</label>
-                        <input type="text" id="min-year" placeholder="e.g., 2500BC">
-                        <span class="error-message" id="min-year-error">Please enter a valid year (e.g., 2500BC, 1492, 2012AD)</span>
-                    </div>
-    
-                    <div class="year-input-group">
-                        <label for="max-year">To Year</label>
-                        <input type="text" id="max-year" placeholder="e.g., 2012">
-                        <span class="error-message" id="max-year-error">Please enter a valid year (e.g., 2500BC, 1492, 2012AD)</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="embedding-methods-container">
-                <h3>Search Method</h3>
-                <div class="embedding-methods">
-                    <div class="embedding-method">
-                        <input type="radio" id="tfidf-method" name="embedding-method" value="tfidf" checked>
-                        <label for="tfidf-method">TF-IDF</label>
-                        <p class="method-description">Term Frequency-Inverse Document Frequency weighs words based on their frequency in documents. Best for keyword-based searches.</p>
-                    </div>
-                    
-                    <div class="embedding-method">
-                        <input type="radio" id="svd-method" name="embedding-method" value="svd">
-                        <label for="svd-method">SVD</label>
-                        <p class="method-description">Singular Value Decomposition identifies latent semantic relationships between words and documents. Good for finding conceptually related events.</p>
-                    </div>
-                    
-                    <div class="embedding-method">
-                        <input type="radio" id="glove-method" name="embedding-method" value="glove">
-                        <label for="glove-method">GloVe</label>
-                        <p class="method-description">Global Vectors for Word Representation captures semantic word relationships trained on vast text corpora. Best for nuanced meaning and context-aware searches.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="social-media-weight-container">
-                <div class="checkbox-container">
-                    <input type="checkbox" id="weigh-social-media" name="weigh-social-media">
-                    <label for="weigh-social-media">Weigh Social Media Sources Higher</label>
-                </div>
-            </div>
-    
-
-        </div>
+        <!-- Main content area with flex layout -->
+        <div class="main-content">
+            <!-- Left side - Filters -->
+            <div class="filters-container">
+                <div class="year-range-container">
+                    <h3 class="year-range-title">Filter by Time Period</h3>
+                    <div class="year-range">
+                        <div class="year-input-group">
+                            <label for="min-year">From Year</label>
+                            <input type="text" id="min-year" placeholder="e.g., 2500BC">
+                            <span class="error-message" id="min-year-error">Please enter a valid year (e.g., 2500BC, 1492, 2012AD)</span>
+                        </div>
         
-       
-        <h2 class="results-heading" id="results-heading" style="display: none;">Discovered Events</h2>
-        <div id="results-container"></div>
+                        <div class="year-input-group">
+                            <label for="max-year">To Year</label>
+                            <input type="text" id="max-year" placeholder="e.g., 2012">
+                            <span class="error-message" id="max-year-error">Please enter a valid year (e.g., 2500BC, 1492, 2012AD)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="embedding-methods-container">
+                    <h3>Search Method</h3>
+                    <div class="embedding-methods">
+                        <div class="embedding-method">
+                            <input type="radio" id="tfidf-method" name="embedding-method" value="tfidf" checked>
+                            <label for="tfidf-method">TF-IDF</label>
+                            <p class="method-description">Term Frequency-Inverse Document Frequency weighs words based on their frequency in documents. Best for keyword-based searches.</p>
+                        </div>
+                        
+                        <div class="embedding-method">
+                            <input type="radio" id="svd-method" name="embedding-method" value="svd">
+                            <label for="svd-method">SVD</label>
+                            <p class="method-description">Singular Value Decomposition identifies latent semantic relationships between words and documents. Good for finding conceptually related events.</p>
+                        </div>
+                        
+                        <div class="embedding-method">
+                            <input type="radio" id="glove-method" name="embedding-method" value="glove">
+                            <label for="glove-method">GloVe</label>
+                            <p class="method-description">Global Vectors for Word Representation captures semantic word relationships trained on vast text corpora. Best for nuanced meaning and context-aware searches.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="social-media-weight-container">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="weigh-social-media" name="weigh-social-media">
+                        <label for="weigh-social-media">Weigh Social Media Sources Higher (this will not consider ~429 events.)</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right side - Results -->
+            <div class="results-section">
+                <h2 class="results-heading" id="results-heading" style="display: none;">Discovered Events</h2>
+                <div id="results-container"></div>
+            </div>
+        </div>
     </div>
 
     <template id="event-template">

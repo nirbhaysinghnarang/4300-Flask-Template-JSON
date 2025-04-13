@@ -1,0 +1,241 @@
+/* Add these styles to your existing styles.css file */
+
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+}
+
+.page-description {
+    font-size: 1.1rem;
+    color: #7f8c8d;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Concepts Summary Section */
+.concepts-summary {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+.summary-item {
+    text-align: center;
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    min-width: 160px;
+}
+
+.summary-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #3498db;
+    margin-bottom: 5px;
+}
+
+.summary-label {
+    font-size: 1rem;
+    color: #7f8c8d;
+}
+
+/* Concepts heading */
+.concepts-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Concepts display */
+#concepts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+    margin-bottom: 50px;
+}
+
+.concept-item {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+    padding: 25px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.concept-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.concept-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.concept-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.concept-variance {
+    background-color: #eaf2f8;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: #3498db;
+    font-weight: 600;
+}
+
+.concept-visualization {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    height: 180px;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.concept-words {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.word-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.word-text {
+    width: 120px;
+    font-weight: 600;
+    color: #34495e;
+}
+
+.word-weight-bar {
+    flex: 1;
+    height: 12px;
+    background-color: #ecf0f1;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+.weight-fill {
+    height: 100%;
+    background-color: #3498db;
+    border-radius: 6px;
+}
+
+.word-weight-value {
+    width: 50px;
+    text-align: right;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.concept-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid #ecf0f1;
+}
+
+.related-events-indicator {
+    display: flex;
+    flex-direction: column;
+}
+
+.event-count {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #34495e;
+}
+
+.event-label {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+.concept-details-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.concept-details-button:hover {
+    background-color: #2980b9;
+}
+
+/* Word cloud styling */
+.word-cloud-word {
+    display: inline-block;
+    margin: 5px;
+    transition: transform 0.2s, color 0.2s;
+    cursor: pointer;
+}
+
+.word-cloud-word:hover {
+    transform: scale(1.1);
+    color: #3498db !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .concepts-summary {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .summary-item {
+        width: 80%;
+    }
+    
+    #concepts-container {
+        grid-template-columns: 1fr;
+    }
+}

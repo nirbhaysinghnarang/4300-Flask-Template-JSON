@@ -474,7 +474,6 @@ h1, h2, h3, h4, h5, h6 {
     align-items: space-between;
     gap: var(--spacing-sm);
     padding: 10px;
-    border: 1px solid var(--primary-color);
     margin: 10px 0;
     border-radius: 10px;
 }
@@ -597,4 +596,71 @@ h1, h2, h3, h4, h5, h6 {
     margin-left: 26px;
     margin-top: 0.4rem;
     line-height: 1.4;
+}
+
+
+.main-content {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* Filters container (left side) */
+.filters-container {
+    flex: 0 0 350px; /* Fixed width for filters */
+    padding-right: 20px;
+}
+
+/* Results section (right side) */
+.results-section {
+    flex: 1; /* Takes the remaining space */
+    min-width: 0; /* Prevents flex items from overflowing */
+}
+
+/* Make sure container has enough space */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* For mobile responsive design */
+@media (max-width: 768px) {
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .filters-container {
+        flex: auto;
+        padding-right: 0;
+    }
+}
+
+/* Optional: Style updates for better presentation in side-by-side layout */
+.year-range-container,
+.embedding-methods-container,
+.social-media-weight-container {
+    margin-bottom: 20px;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.result-item {
+    margin-bottom: 20px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Adjust search bar to full width */
+.search-container {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+#search-input {
+    width: calc(100% - 100px);
 }

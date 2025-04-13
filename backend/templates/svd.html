@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVD Concepts Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='svd_styles.css') }}">
+    <script src="{{ url_for('static', filename='svd_display.js') }}"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1 class="page-title">SVD Concepts Analysis</h1>
+            <p class="page-description">Exploring the semantic concepts discovered through Singular Value Decomposition</p>
+        </header>
+        
+        <div class="concepts-summary">
+            <div class="summary-item">
+                <div class="summary-value">12</div>
+                <div class="summary-label">Concepts Extracted</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value">86.5%</div>
+                <div class="summary-label">Variance Explained</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-value">15,482</div>
+                <div class="summary-label">Documents Analyzed</div>
+            </div>
+        </div>
+        
+        <h2 class="concepts-heading">Primary Semantic Concepts</h2>
+        <div id="concepts-container">
+            <!-- Concepts will be rendered here by JavaScript -->
+        </div>
+    </div>
+
+    <template id="concept-template">
+        <div class="concept-item">
+            <div class="concept-header">
+                <div class="concept-title"></div>
+                <div class="concept-variance"></div>
+            </div>
+            <div class="concept-visualization"></div>
+            <div class="concept-words"></div>
+            <div class="concept-footer">
+                <div class="related-events-indicator">
+                    <span class="event-count"></span>
+                    <span class="event-label">related events</span>
+                </div>
+                <button class="concept-details-button">View Details</button>
+            </div>
+        </div>
+    </template>
+    
+    <template id="word-item-template">
+        <div class="word-item">
+            <span class="word-text"></span>
+            <div class="word-weight-bar">
+                <div class="weight-fill"></div>
+            </div>
+            <span class="word-weight-value"></span>
+        </div>
+    </template>
+</body>
+
+</html>

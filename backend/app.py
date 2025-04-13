@@ -5,17 +5,19 @@ import numpy as np
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import pandas as pd
-from utils import assign_era, get_data
+from utils import assign_era, get_data, get_rows_to_remove
 
 #Different search methods
 from processor import WeightedTfidfProcessor
-from lda_processor import LDAProcessor
 from glove_processor import GloVEProcessor
 from svd_processor import SVDTextProcessor
 from filters import Filters
 
-
+rows_to_remove = get_rows_to_remove()
 historical_data= get_data()
+
+
+
 historical_df = pd.DataFrame(historical_data)
 historical_df['era'] = historical_df['Year'].apply(assign_era)
 historical_df["Name of Incident"] = historical_df["Name of Incident"].apply(
@@ -23,8 +25,18 @@ historical_df["Name of Incident"] = historical_df["Name of Incident"].apply(
 )
 
 
+historical_df_sm = historical_df[~historical_df['Name of Incident'].isin(rows_to_remove)]
+
+
+print("Dataset statistics")
+print("Total rows:", len(historical_df))
+print("Rows to remove:", len(rows_to_remove))
+print("Rows remaining:", len(historical_df_sm))
+
+
+
 weight_processor_social_media = WeightedTfidfProcessor(
-    historical_df.to_dict('records'),
+    historical_df_sm.to_dict('records'),
     weight_fields=['reddit_posts'],
     weight_factor=10
 )
@@ -42,7 +54,7 @@ glove_processor_no_social_media = GloVEProcessor(
 )
 
 glove_processor_social_media = GloVEProcessor(
-    historical_df.to_dict('records'),
+    historical_df_sm.to_dict('records'),
     weight_fields=['reddit_posts'],
     weight_factor=20
 )
@@ -56,9 +68,9 @@ svd_processor_no_social_media = SVDTextProcessor(
 
 
 svd_processor_social_media = SVDTextProcessor(
-    historical_df.to_dict('records'),
+    historical_df_sm.to_dict('records'),
     weight_fields=['reddit_posts'],
-    weight_factor=20
+    weight_factor=10
 )
 
 def tfidf_search(query, use_reddit, top_n=5):
@@ -86,6 +98,16 @@ CORS(app)
 def home():
     mapbox_token = os.environ.get('MAPBOX_ACCESS_TOKEN')
     return render_template('base.html', title="World Heritage Explorer", mapbox_token=mapbox_token)
+
+@app.route("/svd")
+def svd():
+    return render_template('svd.html', title="SVD Concepts Explorer")
+
+
+
+@app.route("/svd/query")
+def get_concepts():
+    return svd_processor_no_social_media.get_term_concept_matrix()
 
 
 @app.route("/historical-sites")
@@ -121,14 +143,12 @@ def historical_search():
     elif embedding_method == "SVD":
         results = svd_search(query, use_reddit)
     
-    results = svd_processor_no_social_media.search(query, top_n=5)
-        
     filtered_results = Filters(
         results,
         min_year,
         max_year
     ).filter_by_year()
-
+    print([res['row']['Name of Incident'] for res in filtered_results])
     return jsonify(filtered_results)
 
 
