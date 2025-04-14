@@ -75,7 +75,7 @@ class SVDTextProcessor:
         for idx in top_indices:
             row = self.rows[idx]
             score = similarities[idx]
-            if score >= 0:
+            if score > 0:
                 results.append({
                     'document': self.doc_labels[idx],
                     'score': score,
