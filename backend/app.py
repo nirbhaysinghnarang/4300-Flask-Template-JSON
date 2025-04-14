@@ -114,7 +114,7 @@ def get_concepts():
 def historical_search():
     query = request.args.get("query", "")
     min_year = request.args.get("minYear", "2500BC")
-    max_year = request.args.get("maxYear", "2012")
+    max_year = request.args.get("maxYear", "2025")
     use_reddit = request.args.get("useReddit", False)
     embedding_method = request.args.get("embeddingMethod","TF")
     
