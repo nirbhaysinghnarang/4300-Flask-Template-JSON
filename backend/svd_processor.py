@@ -116,7 +116,7 @@ class SVDTextProcessor:
         similar_docs = []
         
         for idx in top_indices:
-            if similarities[idx] >= 0:
+            if similarities[idx] > 0:
                 similar_docs.append({
                     'document': self.doc_labels[idx],
                     'score': similarities[idx],
