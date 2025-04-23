@@ -141,3 +141,16 @@ class GloVEProcessor:
         del self.word_vectors
         del self.document_vectors
         gc.collect()
+
+
+    def dump_rows_with_embeddings(self):
+        """
+        Dump rows with their corresponding document embeddings as a DataFrame.
+        
+        Returns:
+            pd.DataFrame: A DataFrame containing original rows and their embeddings
+        """
+        rows_with_embeddings = [row.copy() for row in self.rows]            
+        for i, row in enumerate(rows_with_embeddings):
+            row['embedding'] = self.document_vectors[i].tolist()
+        return pd.DataFrame(rows_with_embeddings)

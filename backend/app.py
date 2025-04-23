@@ -152,8 +152,16 @@ def historical_search():
     return jsonify(filtered_results)
 
 
+@app.route("/clusters")
+def render_clusters():
+    return render_template('cluster-viz.html', title="Clusters", clustered_data=None)
 
 
+@app.route("/get-clusters")
+def get_clusters():
+    with open("clustered_data_100.json", "r") as f:
+        data = json.load(f)
+    return jsonify(data)
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=8080)
+    app.run(debug=True, host="0.0.0.0", port=8081)
