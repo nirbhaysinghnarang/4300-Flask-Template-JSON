@@ -883,3 +883,119 @@ body {
 .cluster-banner:hover .banner-icon {
     animation: pulse 1.5s infinite;
 }
+
+.result-details {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: var(--background-color);
+    padding: 15px;
+    border-radius: var(--border-radius-small);
+    margin-top: 20px;
+}
+
+/* Common styles for both themes and similar events sections */
+.themes-section,
+.similar-events-section {
+    background-color: var(--white);
+    border-radius: var(--border-radius-small);
+    padding: 15px;
+    box-shadow: var(--shadow-light);
+    margin-bottom: 15px;
+}
+
+.themes-section h4,
+.similar-events-section h4 {
+    font-size: 16px;
+    margin: 0 0 12px 0;
+    color: var(--secondary-color);
+    font-family: 'Playfair Display', serif;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 8px;
+}
+
+/* Improved themes tags layout */
+.themes-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.theme-tag {
+    background-color: var(--light-accent);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 14px;
+    color: var(--primary-dark);
+    border: 1px solid var(--accent-color);
+    font-weight: 500;
+}
+
+/* Improved similar events layout */
+.similar-events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.similar-event {
+    font-size: 14px;
+    color: var(--secondary-color);
+    padding: 10px 12px;
+    background-color: var(--light-accent);
+    border-radius: var(--border-radius-small);
+    border-left: 3px solid var(--primary-color);
+}
+
+/* Improved significance indicator */
+.significance {
+    display: flex;
+    align-items: center;
+    background-color: var(--white);
+    padding: 12px 15px;
+    border-radius: var(--border-radius-small);
+    box-shadow: var(--shadow-light);
+    margin-bottom: 15px;
+}
+
+.significance span {
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.significance-bar {
+    width: 120px;
+    height: 8px;
+    background-color: var(--accent-color);
+    border-radius: 4px;
+    margin: 0 10px;
+    overflow: hidden;
+}
+
+.significance-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), #a68c69);
+}
+
+.significance-value {
+    color: var(--primary-dark);
+    font-weight: bold;
+}
+
+/* Media queries for responsive design */
+@media (min-width: 768px) {
+    .result-details {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 600px) {
+    .significance {
+        flex-wrap: wrap;
+    }
+    
+    .significance-bar {
+        width: 100%;
+        margin: 8px 0;
+    }
+}

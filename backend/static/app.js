@@ -162,7 +162,13 @@ function createResultElement(event, index) {
     resultItem.querySelector('.significance-value').textContent = `${significanceVal.toFixed(1)}/10`;
     
     const expandButton = resultItem.querySelector('.expand-button');
-    expandButton.addEventListener('click', () => toggleExpanded(expandButton));    
+    expandButton.addEventListener('click', () => toggleExpanded(expandButton));   
+    
+    //add theemz
+    populateThemes(resultItem, event);
+    populateSimilarEvents(resultItem, event);
+
+
     setupTabs(resultItem, event, index);    
     populateDetailTab(resultItem, event);
     populateTextTab(resultItem, 'context', getEventContext(event));
@@ -172,6 +178,75 @@ function createResultElement(event, index) {
     populateRedditTab(resultItem, event, index);
     
     return resultItem;
+}
+function populateThemes(resultItem, event) {
+    const themesContainer = resultItem.querySelector('.themes-tags');
+    if (!themesContainer) return;
+    
+    themesContainer.innerHTML = '';
+    
+    if (event.themes && event.themes.length > 0) {
+        event.themes.forEach(theme => {
+            const themeTag = document.createElement('span');
+            themeTag.className = 'theme-tag';
+            
+            // Handle SVD themes which might have a special format
+            if (typeof theme === 'string' && theme.startsWith('concept ')) {
+                // For SVD, themes might be in format "Concept X: term1, term2, term3"
+                themeTag.className += ' svd-theme';
+                
+                const parts = theme.split(':');
+                if (parts.length > 1) {
+                    const conceptName = parts[0].trim();
+                    const terms = parts[1].trim();
+                    
+                    const conceptSpan = document.createElement('span');
+                    conceptSpan.className = 'concept-name';
+                    conceptSpan.textContent = conceptName;
+                    
+                    const termsSpan = document.createElement('span');
+                    termsSpan.className = 'concept-terms';
+                    termsSpan.textContent = terms;
+                    
+                    themeTag.appendChild(conceptSpan);
+                    themeTag.appendChild(termsSpan);
+                } else {
+                    themeTag.textContent = theme;
+                }
+            } else {
+                // For TF-IDF and GloVe, themes are simple terms
+                themeTag.textContent = theme;
+            }
+            
+            themesContainer.appendChild(themeTag);
+        });
+    } else {
+        const noThemesSpan = document.createElement('span');
+        noThemesSpan.className = 'no-themes';
+        noThemesSpan.textContent = 'No themes available';
+        themesContainer.appendChild(noThemesSpan);
+    }
+}
+
+function populateSimilarEvents(resultItem, event) {
+    const similarEventsContainer = resultItem.querySelector('.similar-events-list');
+    if (!similarEventsContainer) return;
+    
+    similarEventsContainer.innerHTML = '';
+    
+    if (event.similar_documents && event.similar_documents.length > 0) {
+        event.similar_documents.forEach(doc => {
+            const similarEvent = document.createElement('div');
+            similarEvent.className = 'similar-event';
+            similarEvent.textContent = doc.document;
+            similarEventsContainer.appendChild(similarEvent);
+        });
+    } else {
+        const noSimilarEvents = document.createElement('div');
+        noSimilarEvents.className = 'no-similar-events';
+        noSimilarEvents.textContent = 'No similar events found';
+        similarEventsContainer.appendChild(noSimilarEvents);
+    }
 }
 
 function getEventTitle(event) {

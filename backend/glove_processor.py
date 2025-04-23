@@ -1,4 +1,5 @@
 
+from pydoc import doc
 import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
@@ -8,7 +9,8 @@ from collections import defaultdict
 import gc
 import re
 from tqdm import tqdm
-
+from sklearn.feature_extraction.text import TfidfVectorizer
+import json
 class GloVEProcessor:
     def __init__(self, rows, vector_dim=50, weight_fields=None, weight_factor=5.0):
         self.rows = rows
@@ -29,6 +31,14 @@ class GloVEProcessor:
             f"{row.get('Name of Incident', 'Unknown')} ({row.get('Place Name', 'Unknown')})"
             for row in self.rows
         ]
+        
+        self.vectorizer = TfidfVectorizer(
+            lowercase=True,
+            stop_words='english',
+            max_features=5000,
+            token_pattern=r'\b[a-zA-Z]{3,}\b'
+        )
+        self.tfidf_matrix = self.vectorizer.fit_transform(self.corpus)
     
     def _load_glove_model(self):
         try:
@@ -87,32 +97,85 @@ class GloVEProcessor:
         return similarity_df
     
     def search(self, query, top_n=5):
-        """Search for similar documents"""
         clean_query = self._clean_text(query)
         words = [w for w in clean_query.split() if w in self.word_vectors]
-        
         if not words:
             return []
         
-        query_vector = np.mean([self.word_vectors[w] for w in words], axis=0).reshape(1, -1)
+        query_doc = [clean_query]
+        
+        query_tfidf = self.vectorizer.transform(query_doc).toarray()[0]
+        
+        word_indices = {}
+        for w in words:
+            for i, feature in enumerate(self.vectorizer.get_feature_names_out()):
+                if w == feature:
+                    word_indices[w] = i
+                    break
+        
+        weighted_vectors = []
+        for word in words:
+            if word in word_indices:
+                idx = word_indices[word]
+                weight = query_tfidf[idx]
+                
+                if weight >= 0:
+                    print(f"Word: {word}, Weight: {weight}")
+                    weighted_vectors.append(self.word_vectors[word] * weight)
+        
+        if weighted_vectors:
+            query_vector = np.sum(weighted_vectors, axis=0)
+            norm = np.linalg.norm(query_vector)
+            if norm > 0:
+                query_vector = query_vector / norm
+            query_vector = query_vector.reshape(1, -1)
+        else:
+            query_vector = np.mean([self.word_vectors[w] for w in words], axis=0).reshape(1, -1)
         
         similarities = cosine_similarity(query_vector, self.document_vectors).flatten()
-        
         top_indices = similarities.argsort()[::-1][:top_n]
+        
+        
         
         results = []
         for idx in top_indices:
             row = self.rows[idx]
             score = similarities[idx]
-            
+                
+            doc_similarities = self.get_document_similarity().iloc[idx].sort_values(ascending=False)
+            similar_docs = [
+                {
+                    "document": doc_label,
+                    "score": float(sim_score),
+                    'embedding': self.document_vectors[idx].tolist()
+                }
+                    for doc_label, sim_score in doc_similarities[1:3].items()
+            ]
+                
             if score > 0:
                 results.append({
                     'document': self.doc_labels[idx],
-                    'score': score,
-                    'row': row
+                    'score': float(score),
+                    'row': row,
+                    'similar_documents': similar_docs,
+                    'themes': [self.get_theme(idx)],
+                    'embedding': self.document_vectors[idx].tolist(),
+                    'query_embedding': query_vector.tolist()
                 })
         
         return results
+    
+    
+    def get_theme(self, doc_idx):
+        print(self.rows[doc_idx])
+        idx_name = "Name of Incident"
+        with open('clustered_data_100.json', 'r') as f:
+            clustered_data = json.load(f)
+            
+            element = [x for x in clustered_data if x[idx_name] == self.rows[doc_idx][idx_name]]
+            if element and len(element) > 0:
+                return element[0]['cluster_name']
+            return "This document was ignored in clustering."
     
     def get_closest_documents(self, doc_idx, top_n=5):
         """Find documents most similar to the given document"""
@@ -129,9 +192,10 @@ class GloVEProcessor:
             
             if score > 0:
                 results.append({
-                    'document': self.doc_labels[idx],
+                    'document': self.doc_labels[idx],  
                     'score': score,
-                    'row': row
+                    'row': row,
+                    'embedding': self.document_vectors[idx].tolist()
                 })
         
         return results

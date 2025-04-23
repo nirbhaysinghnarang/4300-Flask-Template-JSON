@@ -5,7 +5,7 @@ import numpy as np
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import pandas as pd
-from utils import assign_era, get_data, get_rows_to_remove
+from utils import assign_era, get_data, get_rows_to_remove, add_2d_embeddings
 
 #Different search methods
 from processor import WeightedTfidfProcessor
@@ -149,6 +149,8 @@ def historical_search():
         max_year
     ).filter_by_year()
     print([res['row']['Name of Incident'] for res in filtered_results])
+    # filtered_results = add_2d_embeddings(filtered_results)
+    # print(filtered_results[0])        
     return jsonify(filtered_results)
 
 

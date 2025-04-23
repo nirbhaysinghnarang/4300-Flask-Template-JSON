@@ -17,7 +17,8 @@ class WeightedTfidfProcessor:
         self.corpus = self._prepare_weighted_corpus()
         self.tfidf_matrix = self.vectorizer.fit_transform(self.corpus)
         self.feature_names = self.vectorizer.get_feature_names_out()
-        
+        self.document_vectors = self.tfidf_matrix.toarray()
+
         self.doc_labels = [
             f"{row.get('Name of Incident', 'Unknown')} ({row.get('Place Name', 'Unknown')})"
             for row in self.rows
@@ -76,16 +77,56 @@ class WeightedTfidfProcessor:
         query_vector = self.vectorizer.transform([query])
         similarities = cosine_similarity(query_vector, self.tfidf_matrix).flatten()
         top_indices = similarities.argsort()[::-1][:top_n]
+        
+        query_words = set(query.lower().split())
+        
         results = []
         for idx in top_indices:
             row = self.rows[idx]
             score = similarities[idx]
+            
             if score > 0:
+                tfidf_scores = self.tfidf_matrix[idx].toarray().flatten()
+                sorted_indices = np.argsort(tfidf_scores)[::-1]
+                
+                matched_terms = {}
+                important_terms = {}
+                
+                for term_idx in sorted_indices[:20]:  
+                    if tfidf_scores[term_idx] > 0:
+                        term = self.feature_names[term_idx]
+                        score = float(tfidf_scores[term_idx])
+                        
+                        if term in query_words:
+                            matched_terms[term] = score
+                        else:
+                            important_terms[term] = score                
+                important_terms = dict(sorted(important_terms.items(), 
+                                            key=lambda x: x[1], 
+                                            reverse=True)[:5])
+                
+                doc_similarities = self.get_document_similarity().iloc[idx].sort_values(ascending=False)
+                similar_docs = [
+                    {
+                        "document": doc_label,
+                        "score": float(sim_score),
+                        'embedding': self.document_vectors[idx].tolist()
+                    }
+                    for doc_label, sim_score in doc_similarities[1:3].items()
+                ]
+                
+                themes = [term for term, _ in sorted(important_terms.items(), 
+                                                key=lambda x: x[1], 
+                                                reverse=True)[:3]]
+                
                 results.append({
                     'document': self.doc_labels[idx],
-                    'score': score,
-                    'row': row
+                    'score': float(score),
+                    'row': row,
+                    'themes': themes,
+                    'similar_documents': similar_docs,
+                    'embedding': self.document_vectors[idx].tolist(),
+                    'query_embedding': query_vector.toarray()[0].tolist()
                 })
-                
-        print("Results",results)
+                    
         return results
