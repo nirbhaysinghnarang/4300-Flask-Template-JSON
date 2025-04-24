@@ -5,9 +5,13 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import Normalizer
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
+import matplotlib
+matplotlib.use('Agg')
 
+import matplotlib.pyplot as plt
+import io
+import base64
 class SVDTextProcessor:
     def __init__(self, rows, n_components=100, weight_fields=None, weight_factor=5.0):
         self.rows = rows
@@ -140,10 +144,70 @@ class SVDTextProcessor:
                     'themes': themes,
                     'similar_documents': similar_docs,
                     'embedding': self.document_vectors[idx].tolist(),
-                    'query_embedding': query_svd.tolist()
+                    'query_embedding': query_svd.tolist(),
+                    'img_b64': self._create_spider_diagram(doc_vector)
                 })
         
         return results
+    
+    
+    
+    
+    def _create_spider_diagram(self, vector, title="SVD Component Strengths", max_components=10):
+        """
+        Create a spider/radar diagram for SVD components and return as base64 string
+        """
+        concepts = self.get_term_concept_matrix(n_terms=10)  # Get top 3 terms for each component
+        
+        n_components = min(len(vector), max_components)
+        values = vector[:n_components]
+        
+        values_abs = np.abs(values)
+        
+        if values_abs.max() > 0:
+            values_norm = values_abs / values_abs.max()
+        else:
+            values_norm = values_abs
+        
+        angles = np.linspace(0, 2*np.pi, n_components, endpoint=False).tolist()
+        
+        values_norm = np.append(values_norm, values_norm[0])
+        angles = np.append(angles, angles[0])
+        
+        fig = plt.figure(figsize=(5, 5))
+        ax = fig.add_subplot(111, polar=True)
+        
+        ax.plot(angles, values_norm, 'o-', linewidth=2)
+        ax.fill(angles, values_norm, alpha=0.25)
+        
+        component_labels = []
+        for i in range(n_components):
+            concept_name = f"Concept {i+1}"
+            if concept_name in concepts:
+                top_terms = [term for term, _ in concepts[concept_name][:3]]
+                label = f"Comp {i+1}\n({', '.join(top_terms)})"
+            else:
+                label = f"Comp {i+1}"
+            component_labels.append(label)
+        
+        # Set the angle labels
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(component_labels, size=8, wrap=True)
+        
+        ax.set_ylim(0, 1)
+        ax.grid(True)
+        
+        plt.title(title, size=15, y=1.1)
+        
+        plt.tight_layout()
+        
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png', bbox_inches='tight')
+        buffer.seek(0)
+        image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        plt.close()
+        
+        return image_base64
     
     def get_term_concept_matrix(self, n_terms=20):
         term_concept_matrix = self.svd.components_

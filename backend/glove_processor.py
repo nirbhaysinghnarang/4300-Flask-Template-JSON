@@ -167,7 +167,6 @@ class GloVEProcessor:
     
     
     def get_theme(self, doc_idx):
-        print(self.rows[doc_idx])
         idx_name = "Name of Incident"
         with open('clustered_data_100.json', 'r') as f:
             clustered_data = json.load(f)

@@ -149,6 +149,38 @@ function displayResults(data) {
     });
 }
 
+function addSpiderDiagram(resultItem, event) {
+    const base64String = event.spider_diagram || event.img_b64;
+    if (!base64String) return;
+    
+    const spiderContainer = document.createElement('div');
+    spiderContainer.className = 'spider-diagram-container';
+    
+    const img = document.createElement('img');
+    img.src = `data:image/png;base64,${base64String}`;
+    img.alt = 'SVD Component Spider Diagram';
+    img.className = 'spider-diagram-image';
+    
+    const title = document.createElement('h4');
+    title.textContent = 'SVD Component Analysis';
+    title.className = 'spider-diagram-title';
+    
+    spiderContainer.appendChild(title);
+    spiderContainer.appendChild(img);
+    
+    const themesSection = resultItem.querySelector('.themes-section');
+    if (themesSection) {
+        themesSection.after(spiderContainer);
+    }
+    
+    const detailsTab = resultItem.querySelector('#details-content .detail-items');
+    if (detailsTab) {
+        const detailSpiderContainer = spiderContainer.cloneNode(true);
+        detailsTab.appendChild(detailSpiderContainer);
+    }
+}
+
+
 function createResultElement(event, index) {
     const template = elements.eventTemplate.content.cloneNode(true);
     const resultItem = template.querySelector('.result-item');    
@@ -167,7 +199,9 @@ function createResultElement(event, index) {
     //add theemz
     populateThemes(resultItem, event);
     populateSimilarEvents(resultItem, event);
-
+    if (event.img_b64) {
+        addSpiderDiagram(resultItem, event);
+    }
 
     setupTabs(resultItem, event, index);    
     populateDetailTab(resultItem, event);
