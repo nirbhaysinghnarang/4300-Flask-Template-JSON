@@ -12,6 +12,7 @@ from processor import WeightedTfidfProcessor
 from glove_processor import GloVEProcessor
 from svd_processor import SVDTextProcessor
 from filters import Filters
+from preprocess import QueryPreprocessor
 
 rows_to_remove = get_rows_to_remove()
 historical_data= get_data()
@@ -118,13 +119,17 @@ def historical_search():
     use_reddit = request.args.get("useReddit", False)
     embedding_method = request.args.get("embeddingMethod","TF")
     
-    print(request.args)
+    preprocess_query = request.args.get("preprocessQuery",True)
     if embedding_method not in [
         "TF",
         "GLOVE",
         "SVD"
     ]:
         embedding_method = "TF"
+    
+    
+    if preprocess_query:
+        query = QueryPreprocessor(tfidf_processor=weight_processor_no_social_media).expand_query(query)
         
     
     print("Query:", query)
@@ -132,6 +137,7 @@ def historical_search():
     print("Max Year:", max_year)
     print("Use Reddit:", use_reddit)
     print("Embedding Method:", embedding_method)
+    print("Preprocess Query:", preprocess_query)
     
     if not query:
         return jsonify([])
@@ -148,10 +154,11 @@ def historical_search():
         min_year,
         max_year
     ).filter_by_year()
-    print([res['row']['Name of Incident'] for res in filtered_results])
-    # filtered_results = add_2d_embeddings(filtered_results)
-    # print(filtered_results[0])        
-    return jsonify(filtered_results)
+    sorted_results = sorted(filtered_results, key=lambda res: res['score'], reverse=True)
+
+    
+    sorted_results.append({"refactored_query": query})
+    return jsonify(sorted_results)
 
 
 @app.route("/clusters")

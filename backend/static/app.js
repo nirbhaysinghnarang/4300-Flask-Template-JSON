@@ -18,7 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
         socialMediaWeight: document.getElementById('weigh-social-media'),
         tfIdfMethod: document.getElementById('tfidf-method'),
         gloveMethod: document.getElementById('glove-method'),
-        svdMethod: document.getElementById('svd-method')
+        svdMethod: document.getElementById('svd-method'),
+        refactorQuery: document.getElementById('refactor-query')
     };
 
     console.log(elements)
@@ -64,7 +65,32 @@ function validateYear(year) {
     const yearRegex = /^\d{1,4}BC$|\d{1,4}$|\d{1,4}AD$/i;
     return yearRegex.test(year);
 }
-
+function showRefactoredQuery(originalQuery, refactoredQuery) {
+    // Create a refactored query info element if it doesn't exist
+    let refactoredQueryInfo = document.getElementById('refactored-query-info');
+    if (!refactoredQueryInfo) {
+        refactoredQueryInfo = document.createElement('div');
+        refactoredQueryInfo.id = 'refactored-query-info';
+        refactoredQueryInfo.className = 'refactored-query-info';
+        
+        // Insert after the refactor query container
+        const refactorContainer = document.querySelector('.refactor-query-container');
+        refactorContainer.insertAdjacentElement('afterend', refactoredQueryInfo);
+    }
+    
+    // Create a more informative display showing original and expanded query
+    refactoredQueryInfo.innerHTML = `
+        <div class="refactored-query-content">
+            <span>Original query:</span> 
+            <strong>${originalQuery}</strong>
+            <span>was expanded to:</span>
+            <strong>${refactoredQuery}</strong>
+        </div>
+    `;
+    
+    // Make sure it's visible with a nice animation
+    refactoredQueryInfo.style.display = 'block';
+}
 function performSearch() {
     const query = elements.searchInput.value.trim();
 
@@ -85,6 +111,7 @@ function performSearch() {
     if (elements.minYear.value) searchParams.append('minYear', elements.minYear.value);
     if (elements.maxYear.value) searchParams.append('maxYear', elements.maxYear.value);
     if(elements.socialMediaWeight.checked) searchParams.append('useReddit', 'true');
+    if (elements.refactorQuery.checked) searchParams.append('preprocessQuery', 'true');
 
 
     if(elements.tfIdfMethod.checked) {
@@ -98,18 +125,32 @@ function performSearch() {
     searchParams.append('embeddingMethod', embeddingMethod);
 
 
-    console.log(elements.tfIdfMethod.checked)
     console.log("FETCHING")
     fetch(`${config.apiEndpoint}?${searchParams.toString()}`)
         .then(response => {
-
+            console.log("HELLO!")
      
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
+            console.log(response)
             return response.json();
         })
-        .then(data => displayResults(data))
+        .then(data=>{
+            console.log(data)
+            console.assert(Array.isArray(data))
+
+            const refactoredQuery = data.filter(item=>Object.keys(item).includes("refactored_query"))[0].refactored_query;
+            console.log("Refactored Query:", refactoredQuery)
+            if (refactoredQuery) {
+                showRefactoredQuery(query,refactoredQuery);
+            }
+            const resultsData = Array.isArray(data) ? data : 
+                (typeof data === 'object' && 'refactored_query' in data ? 
+                    data.filter(item => item !== 'refactored_query') : 
+                    data);
+            displayResults(resultsData);
+        })
         .catch(error => {
             console.error("Error fetching data:", error);
             showNoResults('An error occurred while searching. Please try again.');
@@ -136,6 +177,7 @@ function displayResults(data) {
     }
     
     data.forEach((event, index) => {
+        if(getEventTitle(event) == "Unknown Event") return;
         const resultElement = createResultElement(event, index);
         elements.resultsContainer.appendChild(resultElement);
         

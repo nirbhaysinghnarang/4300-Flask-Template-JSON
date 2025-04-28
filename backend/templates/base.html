@@ -33,6 +33,18 @@
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Search historical events...">
             <button id="search-button">Explore</button>
+
+            
+        </div>
+
+        <div class="refactor-query-container">
+            <input type="checkbox" id="refactor-query" name="refactor-query" checked>
+            <label for="refactor-query">Expand query with related terms</label>
+            <div class="info-icon">ⓘ
+                <div class="info-tooltip">
+                    When enabled, your search query will be enhanced with semantically related terms based on co-occurrence patterns in historical event data. This can help discover relevant events even when they don't exactly match your search terms.
+                </div>
+            </div>
         </div>
         <div id="app-config" data-mapbox-token="{{ mapbox_token }}"></div>
         

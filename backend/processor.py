@@ -73,6 +73,7 @@ class WeightedTfidfProcessor:
         return similarity_df
     
     def search(self, query, top_n=5):
+        print("Query:", query)
         from sklearn.metrics.pairwise import cosine_similarity
         query_vector = self.vectorizer.transform([query])
         similarities = cosine_similarity(query_vector, self.tfidf_matrix).flatten()
