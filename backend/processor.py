@@ -122,7 +122,7 @@ class WeightedTfidfProcessor:
                 
                 results.append({
                     'document': self.doc_labels[idx],
-                    'score': float(score)*10,
+                    'score': float(score),
                     'row': row,
                     'themes': themes,
                     'similar_documents': similar_docs,

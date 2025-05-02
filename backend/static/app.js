@@ -66,6 +66,7 @@ function validateYear(year) {
     return yearRegex.test(year);
 }
 function showRefactoredQuery(originalQuery, refactoredQuery) {
+    if (originalQuery == refactoredQuery) return;
     // Create a refactored query info element if it doesn't exist
     let refactoredQueryInfo = document.getElementById('refactored-query-info');
     if (!refactoredQueryInfo) {
@@ -88,8 +89,10 @@ function showRefactoredQuery(originalQuery, refactoredQuery) {
         </div>
     `;
     
-    // Make sure it's visible with a nice animation
-    refactoredQueryInfo.style.display = 'block';
+   
+        // Make sure it's visible with a nice animation
+        refactoredQueryInfo.style.display = 'block';
+    
 }
 function performSearch() {
     const query = elements.searchInput.value.trim();
