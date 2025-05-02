@@ -121,18 +121,7 @@ class QueryPreprocessor:
     #     return expanded_query
         
     def expand_query(self, query, threshold=0.95, top_n=5, entropy_threshold=0.4):
-        """
-        Advanced query expansion with improved discrimination power.
-        
-        Args:
-            query: The original query string
-            threshold: Minimum TF-IDF score for a term to be considered important
-            top_n: Number of co-occurring terms to add to the expanded query
-            entropy_threshold: Minimum entropy score for expansion terms (0-1)
-            
-        Returns:
-            str: Expanded query with additional related terms
-        """
+ 
         import numpy as np
         from scipy.stats import entropy
         
@@ -211,7 +200,6 @@ class QueryPreprocessor:
                     neg_cooccur_score += 1 - min(1.0, cooccurrence_matrix.loc[term, other_term] / 
                                             (combined_cooccurrence[term] + 1e-10))
             
-            # Normalize and store
             negative_boost[term] = neg_cooccur_score / (len(entropy_filtered) - 1 or 1)
         
         final_scores = {}
