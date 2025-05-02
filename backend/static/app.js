@@ -66,20 +66,27 @@ function validateYear(year) {
     return yearRegex.test(year);
 }
 function showRefactoredQuery(originalQuery, refactoredQuery) {
-    if (originalQuery == refactoredQuery) return;
-    // Create a refactored query info element if it doesn't exist
-    let refactoredQueryInfo = document.getElementById('refactored-query-info');
-    if (!refactoredQueryInfo) {
-        refactoredQueryInfo = document.createElement('div');
-        refactoredQueryInfo.id = 'refactored-query-info';
-        refactoredQueryInfo.className = 'refactored-query-info';
-        
-        // Insert after the refactor query container
-        const refactorContainer = document.querySelector('.refactor-query-container');
-        refactorContainer.insertAdjacentElement('afterend', refactoredQueryInfo);
+    
+    let existingRefactoredQueryInfo = document.getElementById('refactored-query-info');
+    if (existingRefactoredQueryInfo) {
+        existingRefactoredQueryInfo.remove();
     }
     
-    // Create a more informative display showing original and expanded query
+    if (!elements.refactorQuery.checked) {
+        return;
+    }
+    
+    if (originalQuery == refactoredQuery) {
+        return;
+    }
+    
+    let refactoredQueryInfo = document.createElement('div');
+    refactoredQueryInfo.id = 'refactored-query-info';
+    refactoredQueryInfo.className = 'refactored-query-info';
+    
+    const refactorContainer = document.querySelector('.refactor-query-container');
+    refactorContainer.insertAdjacentElement('afterend', refactoredQueryInfo);
+    
     refactoredQueryInfo.innerHTML = `
         <div class="refactored-query-content">
             <span>Original query:</span> 
@@ -89,10 +96,8 @@ function showRefactoredQuery(originalQuery, refactoredQuery) {
         </div>
     `;
     
-   
-        // Make sure it's visible with a nice animation
-        refactoredQueryInfo.style.display = 'block';
-    
+    // Make sure it's visible with a nice animation
+    refactoredQueryInfo.style.display = 'block';
 }
 function performSearch() {
     const query = elements.searchInput.value.trim();
