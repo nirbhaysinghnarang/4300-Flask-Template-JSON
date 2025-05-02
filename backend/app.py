@@ -119,7 +119,7 @@ def historical_search():
     use_reddit = request.args.get("useReddit", False)
     embedding_method = request.args.get("embeddingMethod","TF")
     
-    preprocess_query = request.args.get("preprocessQuery",True)
+    preprocess_query = request.args.get("preprocessQuery",False)
     if embedding_method not in [
         "TF",
         "GLOVE",
